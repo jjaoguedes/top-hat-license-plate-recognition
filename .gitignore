@@ -1,0 +1,22 @@
+# MATLAB
+*.asv
+*.autosave
+*.m~
+*.mlx.autosave
+slprj/
+codegen/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Base de dados
+/data/raw/
+/data/selected/
+
+# Resultados gerados
+/results/baseline/*
+/results/proposed/*
+/results/metrics/*
+/results/figures/*
