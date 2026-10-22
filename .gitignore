@@ -20,3 +20,9 @@ desktop.ini
 /results/proposed/*
 /results/metrics/*
 /results/figures/*
+
+# Imagens processadas pelo sistema proposto
+/data/e2/
+
+# Ground Truth verificado
+/data/ground_truth/ground_truth.csv

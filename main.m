@@ -20,6 +20,7 @@ addpath(fullfile(raizProjeto, 'src', 'utils'));
 addpath(fullfile(raizProjeto, 'src', 'ocr'));
 addpath(fullfile(raizProjeto, 'src', 'evaluation'));
 addpath(fullfile(raizProjeto, 'experiments'));
+addpath(fullfile(raizProjeto, 'src', 'morphology'));
 
 fprintf('\n========================================\n');
 fprintf(' MINI PROJETO - SISTEMA BASELINE\n');
@@ -59,7 +60,7 @@ groundTruth = createGroundTruthTemplate(raizProjeto);
 % Para iniciar ou continuar a anotação,
 % execute esta seção individualmente.
 
-% annotateGroundTruth(raizProjeto);
+%annotateGroundTruth(raizProjeto);
 
 %% 5. Execução do sistema baseline
 
@@ -71,7 +72,7 @@ groundTruth = createGroundTruthTemplate(raizProjeto);
 % Execute esta seção quando desejar gerar os resultados.
 % O arquivo existente não será sobrescrito.
 
-% resultadosBaseline = runBaseline(raizProjeto);
+resultadosBaseline = runBaseline(raizProjeto);
 
 %% 6. Avaliação do reconhecimento
 
@@ -84,7 +85,7 @@ groundTruth = createGroundTruthTemplate(raizProjeto);
 % results/metrics/baseline_metrics.csv
 % results/metrics/baseline_comparison.csv
 
-% metricasBaseline = evaluateRecognition(raizProjeto);
+%metricasBaseline = evaluateRecognition(raizProjeto);
 
 %% 7. Finalização
 
@@ -94,3 +95,18 @@ fprintf('========================================\n');
 
 fprintf('Seleção de imagens e Ground Truth disponíveis.\n');
 fprintf('Execute as demais etapas conforme necessário.\n');
+
+%% 8. Execução do sistema proposto - Top-hat
+
+% Aplica a correção de iluminação não uniforme
+% nas mesmas 40 placas utilizadas pelo baseline.
+%
+% As imagens processadas serão salvas em data/e2/.
+%
+% Execute esta seção quando desejar gerar o experimento.
+% Os arquivos existentes não serão sobrescritos.
+
+raioElementoEstruturante = 9;
+
+% resultadosPropostos = runProposed( ...
+raizProjeto, raioElementoEstruturante);
