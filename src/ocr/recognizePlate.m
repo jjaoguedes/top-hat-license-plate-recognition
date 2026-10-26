@@ -1,58 +1,49 @@
-
-function [textoPlaca, textoOriginal] = recognizePlate(caminhoImagem)
-% RECOGNIZEPLATE Reconhece os caracteres de uma placa veicular.
+function [textoNormalizado, textoBruto] = recognizePlate(caminhoImagem)
+% RECOGNIZEPLATE Reconhece caracteres de uma placa veicular.
 %
-% A função recebe o caminho de uma imagem, executa o OCR
-% do MATLAB e retorna o texto reconhecido.
-%
-% A configuração do OCR deve ser a mesma para os sistemas
-% baseline e Top-hat, garantindo uma comparação justa.
+% Fluxo comum aos sistemas e1 e e2:
+%   1. Leitura da placa.
+%   2. Extracao de ROI proporcional.
+%   3. OCR com linha unica e caracteres alfanumericos.
+%   4. Normalizacao do texto.
 %
 % Entrada:
-%   caminhoImagem - Caminho da imagem da placa.
+%   caminhoImagem - Caminho da imagem (original ou com Top-hat).
 %
-% Saídas:
-%   textoPlaca    - Texto normalizado, contendo apenas
-%                   letras maiúsculas e números.
-%   textoOriginal - Texto bruto retornado pelo OCR.
+% Saidas:
+%   textoNormalizado - Letras maiusculas e digitos, sem separadores.
+%   textoBruto       - Texto retornado pelo OCR sem normalizacao.
+%
+% Observacao: a ROI deve ser a mesma para e1 e e2. A funcao
+% extractPlateROI deve estar disponivel no caminho do MATLAB.
 
-    %% 1. Validação do arquivo
-
-    % Verifica se a imagem informada existe.
-    if ~isfile(caminhoImagem)
-        error('Imagem da placa não encontrada: %s', ...
-            char(caminhoImagem));
+    if ~(ischar(caminhoImagem) || ...
+            (isstring(caminhoImagem) && isscalar(caminhoImagem)))
+        error('recognizePlate:CaminhoInvalido', ...
+            'Informe o caminho da imagem como texto.');
     end
 
-    %% 2. Leitura da imagem
+    if ~isfile(caminhoImagem)
+        error('recognizePlate:ArquivoNaoEncontrado', ...
+            'Imagem nao encontrada: %s', char(caminhoImagem));
+    end
 
-    % Carrega a imagem da placa selecionada.
-    imagemPlaca = imread(caminhoImagem);
+    %% 1. Leitura da imagem
+    imagemOriginal = imread(caminhoImagem);
 
-    %% 3. Configuração e execução do OCR
+    %% 2. Regiao de interesse (comum a e1 e e2)
+    imagemROI = extractPlateROI(imagemOriginal);
 
-    % Define os caracteres permitidos no reconhecimento.
+    %% 3. Reconhecimento optico dos caracteres
     caracteresPermitidos = ...
         'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-    % Executa o reconhecimento óptico de caracteres.
-    % LayoutAnalysis = 'line' considera uma linha de texto.
-    resultadoOCR = ocr(imagemPlaca, ...
+    resultadoOCR = ocr(imagemROI, ...
         'LayoutAnalysis', 'line', ...
         'CharacterSet', caracteresPermitidos);
 
-    %% 4. Armazenamento do texto original
-
-    % Preserva o resultado bruto retornado pelo OCR.
-    textoOriginal = string(resultadoOCR.Text);
-
-    %% 5. Normalização do texto
-
-    % Remove espaços, pontuação e caracteres especiais.
-    textoPlaca = regexprep(textoOriginal, ...
-        '[^A-Za-z0-9]', '');
-
-    % Converte as letras para maiúsculas.
-    textoPlaca = upper(textoPlaca);
-
+    %% 4. Texto bruto e normalizacao
+    textoBruto = string(resultadoOCR.Text);
+    textoNormalizado = upper(regexprep( ...
+        textoBruto, '[^A-Za-z0-9]', ''));
 end

@@ -1,5 +1,5 @@
 
-function metricas = evaluateRecognition(raizProjeto)
+function metricas = evaluateRecognition(raizProjeto, sistema)
 % EVALUATERECOGNITION Avalia o reconhecimento OCR do baseline.
 %
 % A função compara os caracteres reconhecidos pelo OCR
@@ -16,6 +16,18 @@ function metricas = evaluateRecognition(raizProjeto)
 %   metricas - Tabela com o número de placas avaliadas,
 %              reconhecimentos corretos, acurácia (%)
 %              e taxa de erro de caracteres (CER).
+    
+    %% Configuração do sistema avaliado
+
+    % Utiliza o baseline caso nenhum sistema seja informado.
+    if nargin < 2
+        sistema = 'baseline';
+    end
+
+    % Permite avaliar apenas os sistemas implementados.
+    if ~ismember(string(sistema), ["baseline", "proposed"])
+        error('Sistema inválido. Utilize baseline ou proposed.');
+    end
 
     %% 1. Definição dos caminhos
 
@@ -23,16 +35,16 @@ function metricas = evaluateRecognition(raizProjeto)
         'data', 'ground_truth', 'ground_truth.csv');
 
     arquivoBaseline = fullfile(raizProjeto, ...
-        'results', 'baseline', 'ocr_baseline.csv');
+        'results', sistema, ['ocr_' sistema '.csv']);
 
     diretorioMetricas = fullfile(raizProjeto, ...
         'results', 'metrics');
 
     arquivoMetricas = fullfile(diretorioMetricas, ...
-        'baseline_metrics.csv');
+        [sistema '_metrics.csv']);
 
     arquivoDetalhamento = fullfile(diretorioMetricas, ...
-        'baseline_comparison.csv');
+        [sistema '_comparison.csv']);
 
     %% 2. Verificação dos arquivos de entrada
 
@@ -41,8 +53,7 @@ function metricas = evaluateRecognition(raizProjeto)
     end
 
     if ~isfile(arquivoBaseline)
-        error(['Resultados do baseline não encontrados. ', ...
-            'Execute runBaseline.m primeiro.']);
+        error('Resultados OCR não encontrados: %s', arquivoBaseline);
     end
 
     %% 3. Proteção dos resultados existentes
@@ -238,7 +249,7 @@ function metricas = evaluateRecognition(raizProjeto)
     %% 16. Exibição dos resultados
 
     fprintf('\n========================================\n');
-    fprintf(' AVALIAÇÃO DO SISTEMA BASELINE\n');
+fprintf(' AVALIAÇÃO DO SISTEMA %s\n', upper(sistema));
     fprintf('========================================\n');
 
     fprintf('Placas avaliadas: %d\n', quantidadeAvaliadas);
