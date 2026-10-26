@@ -1,112 +1,390 @@
 
-%% MINI PROJETO - RECONHECIMENTO DE PLACAS
-% Sistema de referência (Baseline)
+%% MINI PROJETO - OPERADOR TOP-HAT
+% Correção de iluminação não uniforme em placas veiculares.
 %
 % Objetivo:
-% Preparar a base de imagens, construir o Ground Truth,
-% executar o reconhecimento OCR e avaliar os resultados.
+% Executar e comparar dois sistemas de reconhecimento:
 %
-% Nesta etapa, o operador Top-hat não será utilizado.
+% e1 - Sistema de referência, sem Top-hat.
+% e2 - Sistema proposto, com Top-hat.
+%
+% Ambos utilizam:
+%   - As mesmas 40 placas selecionadas.
+%   - O mesmo Ground Truth.
+%   - A mesma configuração de OCR.
+%   - As mesmas métricas de avaliação.
+%
+% Os arquivos existentes são preservados.
+
 
 %% 1. Configuração inicial
 
 clc;
 
-% Obtém o caminho da pasta principal do projeto.
+% Obtém o caminho principal do projeto.
 raizProjeto = fileparts(mfilename('fullpath'));
 
-% Adiciona os diretórios das funções ao MATLAB.
+% Adiciona os diretórios dos módulos.
 addpath(fullfile(raizProjeto, 'src', 'utils'));
 addpath(fullfile(raizProjeto, 'src', 'ocr'));
 addpath(fullfile(raizProjeto, 'src', 'evaluation'));
-addpath(fullfile(raizProjeto, 'experiments'));
 addpath(fullfile(raizProjeto, 'src', 'morphology'));
+addpath(fullfile(raizProjeto, 'experiments'));
+
+% Parâmetros da seleção.
+quantidadeImagens = 40;
+sementeAleatoria = 42;
+
+% Parâmetro do sistema Top-hat.
+% Definir após concluir a validação do operador.
+raioElementoEstruturante = 21;
+fprintf('Raio do elemento estruturante: %d\n', ...
+    raioElementoEstruturante);
 
 fprintf('\n========================================\n');
-fprintf(' MINI PROJETO - SISTEMA BASELINE\n');
+fprintf(' MINI PROJETO - TOP-HAT\n');
 fprintf('========================================\n');
 
-fprintf('Diretório do projeto:\n%s\n', raizProjeto);
 
 %% 2. Seleção das imagens
 
-% Seleciona 40 pares de imagens utilizando semente fixa.
-%
-% Caso a seleção já exista, os mesmos arquivos serão
-% reutilizados, evitando alterações no experimento.
-
-quantidadeImagens = 40;
-sementeAleatoria = 42;
+% Seleciona ou reutiliza os 40 pares já registrados.
+% A seleção existente não será modificada.
 
 selecao = selectImages( ...
     raizProjeto, quantidadeImagens, sementeAleatoria);
 
-%% 3. Preparação do Ground Truth
+% Organiza os registros por identificador crescente.
+selecao = sortrows(selecao, 'image_id');
 
-% Cria o arquivo CSV inicial para as transcrições.
-%
-% Caso o arquivo já exista, suas informações são
-% carregadas sem substituir as anotações anteriores.
+fprintf('\nSeleção disponível: %d imagens.\n', ...
+    height(selecao));
 
+
+%% 3. Verificação do Ground Truth
+
+% Cria ou recupera o arquivo das transcrições.
 groundTruth = createGroundTruthTemplate(raizProjeto);
 
-%% 4. Anotação manual das placas
+% Organiza os registros pela mesma ordem da seleção.
+groundTruth = sortrows(groundTruth, 'image_id');
 
-% Apresenta as placas ainda não verificadas.
+% Confirma a correspondência entre os arquivos.
+if ~isequal(selecao.image_id, groundTruth.image_id) || ...
+        ~isequal(selecao.file_name, groundTruth.file_name)
+
+    error('Ground Truth não corresponde à seleção.');
+end
+
+% Conta as transcrições verificadas.
+verificadas = groundTruth.status == "verified" & ...
+    ~ismissing(groundTruth.plate_text) & ...
+    strlength(groundTruth.plate_text) > 0;
+
+quantidadeVerificadas = sum(verificadas);
+
+fprintf('\nGround Truth verificado: %d/%d\n', ...
+    quantidadeVerificadas, quantidadeImagens);
+
+% Interrompe a avaliação caso existam anotações pendentes.
+if quantidadeVerificadas ~= quantidadeImagens
+
+    error(['Conclua as 40 transcrições do Ground Truth ', ...
+        'antes de executar a avaliação.']);
+end
+
+
+%% 4. Preparação das imagens do sistema e1
+
+% e1 utiliza diretamente as placas selecionadas.
+% Nenhuma transformação de imagem é aplicada.
 %
-% A execução depende da identificação manual dos
-% caracteres e da confirmação pelo usuário.
+% As placas são copiadas para data/e1/ apenas
+% para organizar a entrega do experimento.
+
+diretorioPlacas = fullfile(raizProjeto, ...
+    'data', 'selected', 'plates');
+
+diretorioE1 = fullfile(raizProjeto, 'data', 'e1');
+
+if ~isfolder(diretorioE1)
+    mkdir(diretorioE1);
+end
+
+fprintf('\nPreparando imagens do sistema e1...\n');
+
+for indice = 1:height(selecao)
+
+    nomeArquivo = char(selecao.file_name(indice));
+
+    arquivoOrigem = fullfile(diretorioPlacas, ...
+        nomeArquivo);
+
+    arquivoDestino = fullfile(diretorioE1, ...
+        nomeArquivo);
+
+    % Confirma que a placa original existe.
+    if ~isfile(arquivoOrigem)
+        error('Placa não encontrada: %s', nomeArquivo);
+    end
+
+    % Copia somente quando o destino não existe.
+    if ~isfile(arquivoDestino)
+
+        [sucesso, mensagem] = copyfile( ...
+            arquivoOrigem, arquivoDestino);
+
+        if ~sucesso
+            error('Falha na cópia: %s', mensagem);
+        end
+
+    else
+
+        % Confirma que a cópia existente é idêntica.
+        imagemOrigem = imread(arquivoOrigem);
+        imagemDestino = imread(arquivoDestino);
+
+        if ~isequal(imagemOrigem, imagemDestino)
+            error('Imagem e1 diferente da origem: %s', ...
+                nomeArquivo);
+        end
+
+    end
+end
+
+% Confere a quantidade de imagens.
+arquivosE1 = dir(fullfile(diretorioE1, '*.jpg'));
+
+if numel(arquivosE1) ~= quantidadeImagens
+    error('O diretório e1 não contém exatamente 40 imagens.');
+end
+
+fprintf('Imagens e1 preparadas: %d\n', numel(arquivosE1));
+
+
+%% 5. Execução do sistema e1 - Baseline
+
+% O baseline executa o OCR diretamente nas placas
+% selecionadas, sem aplicar Top-hat.
+
+arquivoOCRBaseline = fullfile(raizProjeto, ...
+    'results', 'baseline', 'ocr_baseline.csv');
+
+if ~isfile(arquivoOCRBaseline)
+
+    fprintf('\nExecutando OCR do sistema e1...\n');
+
+    resultadosBaseline = runBaseline(raizProjeto);
+
+else
+
+    fprintf('\nResultados e1 existentes preservados.\n');
+
+    resultadosBaseline = readtable( ...
+        arquivoOCRBaseline, 'TextType', 'string');
+end
+
+
+%% 6. Avaliação do sistema e1
+
+arquivoMetricasBaseline = fullfile(raizProjeto, ...
+    'results', 'metrics', 'baseline_metrics.csv');
+
+if ~isfile(arquivoMetricasBaseline)
+
+    fprintf('\nAvaliando sistema e1...\n');
+
+    metricasBaseline = evaluateRecognition( ...
+        raizProjeto, 'baseline');
+
+else
+
+    fprintf('\nMétricas e1 existentes preservadas.\n');
+
+    metricasBaseline = readtable( ...
+        arquivoMetricasBaseline, 'TextType', 'string');
+end
+
+
+%% 7. Execução do sistema e2 - Top-hat
+
+% O sistema proposto aplica o Top-hat nas mesmas
+% 40 placas utilizadas pelo baseline.
 %
-% Para iniciar ou continuar a anotação,
-% execute esta seção individualmente.
+% As imagens processadas são salvas em data/e2/.
 
-%annotateGroundTruth(raizProjeto);
+arquivoOCRProposto = fullfile(raizProjeto, ...
+    'results', 'proposed', 'ocr_proposed.csv');
 
-%% 5. Execução do sistema baseline
+diretorioE2 = fullfile(raizProjeto, 'data', 'e2');
 
-% Executa o OCR nas 40 placas selecionadas.
-%
-% Os resultados são armazenados em:
-% results/baseline/ocr_baseline.csv
-%
-% Execute esta seção quando desejar gerar os resultados.
-% O arquivo existente não será sobrescrito.
+if ~isfile(arquivoOCRProposto)
 
-resultadosBaseline = runBaseline(raizProjeto);
+    % Evita executar sobre imagens processadas
+    % anteriormente em uma execução interrompida.
+    if isfolder(diretorioE2)
 
-%% 6. Avaliação do reconhecimento
+        arquivosExistentes = dir(fullfile( ...
+            diretorioE2, '*.jpg'));
 
-% Compara os resultados do OCR com o Ground Truth.
-%
-% Recomenda-se executar apenas após verificar
-% manualmente as 40 placas selecionadas.
-%
-% Os resultados serão armazenados em:
-% results/metrics/baseline_metrics.csv
-% results/metrics/baseline_comparison.csv
+        if ~isempty(arquivosExistentes)
+            error(['Existem imagens em data/e2/ sem ', ...
+                'resultados OCR completos. ', ...
+                'Verifique os arquivos antes de continuar.']);
+        end
+    end
 
-%metricasBaseline = evaluateRecognition(raizProjeto);
+    fprintf('\nExecutando sistema e2 - Top-hat...\n');
 
-%% 7. Finalização
+    resultadosPropostos = runProposed( ...
+        raizProjeto, raioElementoEstruturante);
+
+else
+
+    fprintf('\nResultados e2 existentes preservados.\n');
+
+    resultadosPropostos = readtable( ...
+        arquivoOCRProposto, 'TextType', 'string');
+
+end
+
+
+%% 8. Verificação das imagens processadas em e2
+
+% Confirma que todas as placas foram processadas
+% e que os nomes originais foram preservados.
+
+if ~isfolder(diretorioE2)
+    error('Diretório data/e2/ não encontrado.');
+end
+
+arquivosE2 = dir(fullfile(diretorioE2, '*.jpg'));
+
+if numel(arquivosE2) ~= quantidadeImagens
+    error('O diretório e2 não contém exatamente 40 imagens.');
+end
+
+nomesE2 = sort(string({arquivosE2.name})');
+nomesSelecionados = sort(selecao.file_name);
+
+if ~isequal(nomesE2, nomesSelecionados)
+    error('Os arquivos e2 não correspondem à seleção.');
+end
+
+fprintf('\nImagens e2 verificadas: %d\n', ...
+    numel(arquivosE2));
+
+
+%% 9. Avaliação do sistema e2
+
+arquivoMetricasPropostas = fullfile(raizProjeto, ...
+    'results', 'metrics', 'proposed_metrics.csv');
+
+if ~isfile(arquivoMetricasPropostas)
+
+    fprintf('\nAvaliando sistema e2...\n');
+
+    metricasPropostas = evaluateRecognition( ...
+        raizProjeto, 'proposed');
+
+else
+
+    fprintf('\nMétricas e2 existentes preservadas.\n');
+
+    metricasPropostas = readtable( ...
+        arquivoMetricasPropostas, 'TextType', 'string');
+end
+
+
+%% 10. Comparação dos resultados
+
+% Organiza as principais métricas dos dois sistemas.
+
+sistemas = ["e1 - Baseline"; "e2 - Top-hat"];
+
+placasAvaliadas = [ ...
+    metricasBaseline.verified_plates;
+    metricasPropostas.verified_plates];
+
+placasCorretas = [ ...
+    metricasBaseline.exact_matches;
+    metricasPropostas.exact_matches];
+
+acuracia = [ ...
+    metricasBaseline.accuracy_percent;
+    metricasPropostas.accuracy_percent];
+
+cer = [ ...
+    metricasBaseline.cer_percent;
+    metricasPropostas.cer_percent];
+
+% Cria a tabela comparativa.
+comparacaoFinal = table( ...
+    sistemas, ...
+    placasAvaliadas, ...
+    placasCorretas, ...
+    acuracia, ...
+    cer, ...
+    'VariableNames', { ...
+    'sistema', ...
+    'placas_avaliadas', ...
+    'placas_corretas', ...
+    'acuracia_percent', ...
+    'cer_percent'});
 
 fprintf('\n========================================\n');
-fprintf(' CONFIGURAÇÃO INICIAL CONCLUÍDA\n');
+fprintf(' COMPARAÇÃO FINAL - e1 x e2\n');
 fprintf('========================================\n');
 
-fprintf('Seleção de imagens e Ground Truth disponíveis.\n');
-fprintf('Execute as demais etapas conforme necessário.\n');
+disp(comparacaoFinal);
 
-%% 8. Execução do sistema proposto - Top-hat
+% Exibe as diferenças entre os sistemas.
+diferencaAcuracia = ...
+    acuracia(2) - acuracia(1);
 
-% Aplica a correção de iluminação não uniforme
-% nas mesmas 40 placas utilizadas pelo baseline.
-%
-% As imagens processadas serão salvas em data/e2/.
-%
-% Execute esta seção quando desejar gerar o experimento.
-% Os arquivos existentes não serão sobrescritos.
+diferencaCER = ...
+    cer(2) - cer(1);
 
-raioElementoEstruturante = 9;
+fprintf('Diferença de acurácia: %+.2f p.p.\n', ...
+    diferencaAcuracia);
 
-% resultadosPropostos = runProposed( ...
-raizProjeto, raioElementoEstruturante);
+fprintf('Diferença de CER: %+.2f p.p.\n', ...
+    diferencaCER);
+
+
+%% 11. Salvamento da comparação
+
+diretorioMetricas = fullfile(raizProjeto, ...
+    'results', 'metrics');
+
+arquivoComparacao = fullfile(diretorioMetricas, ...
+    'comparison_e1_e2.csv');
+
+% Preserva o resultado comparativo existente.
+if ~isfile(arquivoComparacao)
+
+    writetable(comparacaoFinal, arquivoComparacao);
+
+    fprintf('\nComparação salva em:\n%s\n', ...
+        arquivoComparacao);
+
+else
+
+    fprintf('\nComparação existente preservada:\n%s\n', ...
+        arquivoComparacao);
+end
+
+
+%% 12. Finalização
+
+fprintf('\n========================================\n');
+fprintf(' EXPERIMENTOS CONCLUÍDOS\n');
+fprintf('========================================\n');
+
+fprintf('Sistema e1: data/e1/\n');
+fprintf('Sistema e2: data/e2/\n');
+
+fprintf('Resultados: results/\n');
+
+fprintf('\nTotal de imagens por sistema: %d\n', ...
+    quantidadeImagens);
