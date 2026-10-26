@@ -1,4 +1,6 @@
+# ==========================================
 # MATLAB
+# ==========================================
 *.asv
 *.autosave
 *.m~
@@ -6,23 +8,36 @@
 slprj/
 codegen/
 
+# ==========================================
 # Sistema operacional
+# ==========================================
 .DS_Store
 Thumbs.db
 desktop.ini
 
+# ==========================================
 # Base de dados
+# ==========================================
 /data/raw/
 /data/selected/
 
-# Resultados gerados
-/results/baseline/*
-/results/proposed/*
-/results/metrics/*
-/results/figures/*
-
-# Imagens processadas pelo sistema proposto
+# ==========================================
+# Imagens processadas
+# ==========================================
+/data/e1/
 /data/e2/
 
-# Ground Truth verificado
+# ==========================================
+# Ground Truth
+# ==========================================
 /data/ground_truth/ground_truth.csv
+
+# ==========================================
+# Resultados experimentais
+# ==========================================
+/results/
+
+# ==========================================
+# Arquivos de experimentos anteriores
+# ==========================================
+/archived/
