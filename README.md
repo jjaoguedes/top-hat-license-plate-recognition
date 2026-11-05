@@ -75,6 +75,33 @@ Serão investigadas métricas como:
 - Taxa de erro de caracteres (CER).
 - Quantidade de placas reconhecidas corretamente.
 
+### Relatório dos experimentos com ROI
+
+Para avaliar o baseline e o sistema Top-hat com a região da placa extraída
+antes do OCR, execute no MATLAB a partir da raiz do projeto:
+
+```matlab
+addpath(genpath(pwd));
+[resultados, resumo, comparacao] = testAllPlateROIs(pwd, true, 51);
+relatorioROI = generateROIResultsReport(pwd);
+```
+
+`testAllPlateROIs` aplica `extractPlateROI` aos dois sistemas e salva os
+resultados OCR em `results/analysis/roi_square_...`. O gerador de relatório
+usa os cenários `e1_com_roi` e `e2_com_roi` dessa execução. Por padrão, ele
+seleciona a execução mais recente que contém os resultados OCR completos.
+Para selecionar uma pasta específica:
+
+```matlab
+relatorioROI = generateROIResultsReport(pwd, ...
+    'results/analysis/roi_square_51_yyyymmdd_HHMMSS');
+```
+
+As tabelas e o relatório textual são salvos em
+`results/reports/roi_comparacao_...`, e os gráficos em
+`results/figures/roi_comparacao_...`. Esses diretórios são separados dos
+relatórios produzidos por `generateResultsReport`.
+
 ## 8. Referências
 
 - SOILLE, Pierre. *Morphological Image Analysis: Principles and Applications*.
