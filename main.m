@@ -94,14 +94,11 @@ if quantidadeVerificadas ~= quantidadeImagens
         'antes de executar a avaliação.']);
 end
 
-
 %% 4. Preparação das imagens do sistema e1
 
 % e1 utiliza diretamente as placas selecionadas.
 % Nenhuma transformação de imagem é aplicada.
-%
-% As placas são copiadas para data/e1/ apenas
-% para organizar a entrega do experimento.
+% As placas são copiadas para data/e1/
 
 diretorioPlacas = fullfile(raizProjeto, ...
     'data', 'selected', 'plates');
@@ -141,7 +138,7 @@ for indice = 1:height(selecao)
 
     else
 
-        % Confirma que a cópia existente é idêntica.
+        % Confirma que a cópia existente é igual.
         imagemOrigem = imread(arquivoOrigem);
         imagemDestino = imread(arquivoDestino);
 
@@ -162,14 +159,13 @@ end
 
 fprintf('Imagens e1 preparadas: %d\n', numel(arquivosE1));
 
-
 %% 5. Execução do sistema e1 - Baseline
 
 % O baseline executa o OCR diretamente nas placas
 % selecionadas, sem aplicar Top-hat.
 
 arquivoOCRBaseline = fullfile(raizProjeto, ...
-    'results', 'baseline', 'ocr_baseline.csv');
+    'results', 'e1_baseline', 'ocr_baseline.csv');
 
 if ~isfile(arquivoOCRBaseline)
 
@@ -185,29 +181,7 @@ else
         arquivoOCRBaseline, 'TextType', 'string');
 end
 
-
-%% 6. Avaliação do sistema e1
-
-arquivoMetricasBaseline = fullfile(raizProjeto, ...
-    'results', 'metrics', 'baseline_metrics.csv');
-
-if ~isfile(arquivoMetricasBaseline)
-
-    fprintf('\nAvaliando sistema e1...\n');
-
-    metricasBaseline = evaluateRecognition( ...
-        raizProjeto, 'baseline');
-
-else
-
-    fprintf('\nMétricas e1 existentes preservadas.\n');
-
-    metricasBaseline = readtable( ...
-        arquivoMetricasBaseline, 'TextType', 'string');
-end
-
-
-%% 7. Execução do sistema e2 - Top-hat
+%% 6. Execução do sistema e2 - Top-hat
 
 % O sistema proposto aplica o Top-hat nas mesmas
 % 40 placas utilizadas pelo baseline.
@@ -251,7 +225,7 @@ else
 end
 
 
-%% 8. Verificação das imagens processadas em e2
+%% 7. Verificação das imagens processadas em e2
 
 % Confirma que todas as placas foram processadas
 % e que os nomes originais foram preservados.
@@ -277,116 +251,6 @@ fprintf('\nImagens e2 verificadas: %d\n', ...
     numel(arquivosE2));
 
 
-%% 9. Avaliação do sistema e2
-
-arquivoMetricasPropostas = fullfile(raizProjeto, ...
-    'results', 'metrics', 'proposed_metrics.csv');
-
-if ~isfile(arquivoMetricasPropostas)
-
-    fprintf('\nAvaliando sistema e2...\n');
-
-    metricasPropostas = evaluateRecognition( ...
-        raizProjeto, 'proposed');
-
-else
-
-    fprintf('\nMétricas e2 existentes preservadas.\n');
-
-    metricasPropostas = readtable( ...
-        arquivoMetricasPropostas, 'TextType', 'string');
-end
 
 
-%% 10. Comparação dos resultados
 
-% Organiza as principais métricas dos dois sistemas.
-
-sistemas = ["e1 - Baseline"; "e2 - Top-hat"];
-
-placasAvaliadas = [ ...
-    metricasBaseline.verified_plates;
-    metricasPropostas.verified_plates];
-
-placasCorretas = [ ...
-    metricasBaseline.exact_matches;
-    metricasPropostas.exact_matches];
-
-acuracia = [ ...
-    metricasBaseline.accuracy_percent;
-    metricasPropostas.accuracy_percent];
-
-cer = [ ...
-    metricasBaseline.cer_percent;
-    metricasPropostas.cer_percent];
-
-% Cria a tabela comparativa.
-comparacaoFinal = table( ...
-    sistemas, ...
-    placasAvaliadas, ...
-    placasCorretas, ...
-    acuracia, ...
-    cer, ...
-    'VariableNames', { ...
-    'sistema', ...
-    'placas_avaliadas', ...
-    'placas_corretas', ...
-    'acuracia_percent', ...
-    'cer_percent'});
-
-fprintf('\n========================================\n');
-fprintf(' COMPARAÇÃO FINAL - e1 x e2\n');
-fprintf('========================================\n');
-
-disp(comparacaoFinal);
-
-% Exibe as diferenças entre os sistemas.
-diferencaAcuracia = ...
-    acuracia(2) - acuracia(1);
-
-diferencaCER = ...
-    cer(2) - cer(1);
-
-fprintf('Diferença de acurácia: %+.2f p.p.\n', ...
-    diferencaAcuracia);
-
-fprintf('Diferença de CER: %+.2f p.p.\n', ...
-    diferencaCER);
-
-
-%% 11. Salvamento da comparação
-
-diretorioMetricas = fullfile(raizProjeto, ...
-    'results', 'metrics');
-
-arquivoComparacao = fullfile(diretorioMetricas, ...
-    'comparison_e1_e2.csv');
-
-% Preserva o resultado comparativo existente.
-if ~isfile(arquivoComparacao)
-
-    writetable(comparacaoFinal, arquivoComparacao);
-
-    fprintf('\nComparação salva em:\n%s\n', ...
-        arquivoComparacao);
-
-else
-
-    fprintf('\nComparação existente preservada:\n%s\n', ...
-        arquivoComparacao);
-end
-
-
-%% 12. Finalização
-
-fprintf('\n========================================\n');
-fprintf(' EXPERIMENTOS CONCLUÍDOS\n');
-fprintf('========================================\n');
-
-fprintf('Sistema e1: data/e1/\n');
-fprintf('Sistema e2: data/e2/\n');
-
-fprintf('Resultados: results/\n');
-
-fprintf('\nTotal de imagens por sistema: %d\n', ...
-    quantidadeImagens);
