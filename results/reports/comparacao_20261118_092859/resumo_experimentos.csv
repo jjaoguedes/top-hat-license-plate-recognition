@@ -1,0 +1,3 @@
+sistema,placas_avaliadas,placas_corretas,placas_incorretas,acuracia_percent,cer_global_percent,cer_media_por_placa_percent,ocr_vazios
+e1 - Baseline,40,1,39,2.5,83.1541218637993,83.2619047619048,22
+e2 - Top-hat,40,2,38,5,81.7204301075269,81.4880952380953,23

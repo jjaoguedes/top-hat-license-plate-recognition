@@ -1,0 +1,4 @@
+image_id,file_name,ground_truth,ocr_e1,ocr_e2,erros_e1,erros_e2,cer_e1_percent,cer_e2_percent,diferenca_cer_percent,correta_e1,correta_e2,situacao_cer,situacao_acerto
+8,image_0008.jpg,EZEZBEH,,EZEZBEH,7,0,100,0,-100,0,1,melhorou_CER,passou_a_acertar
+54,image_0054.jpg,3RJT926,3RITI26,3RJT926,2,0,28.5714285714286,0,-28.5714285714286,0,1,melhorou_CER,passou_a_acertar
+97,image_0097.jpg,2XRK320,2XRK320,IAEEREDL2XRK320,0,8,0,114.285714285714,114.285714285714,1,0,piorou_CER,deixou_de_acertar
