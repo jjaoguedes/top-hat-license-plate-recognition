@@ -38,7 +38,7 @@ sementeAleatoria = 42;
 % Parâmetro do sistema Top-hat.
 % Definir após concluir a validação do operador.
 formaElementoEstruturante = 'disk';
-raioElementoEstruturante = 51;
+raioElementoEstruturante = 25;
 fprintf('Raio do elemento estruturante: %d\n', ...
     raioElementoEstruturante);
 
@@ -250,6 +250,23 @@ end
 fprintf('\nImagens e2 verificadas: %d\n', ...
     numel(arquivosE2));
 
+%% 8. Relatório consolidado dos dois sistemas
+
+configuracaoRelatorio = struct( ...
+    'operador', 'Black Top-hat', ...
+    'elemento', formaElementoEstruturante, ...
+    'tamanho', raioElementoEstruturante, ...
+    'roi', false, ...
+    'layoutOCR', 'Block', ...
+    'semente', sementeAleatoria);
+
+fprintf('\nGerando relatório consolidado e1 x e2...\n');
+
+relatorioFinal = generateResultsReport( ...
+    raizProjeto, configuracaoRelatorio);
+
+fprintf('Relatório: %s\n', relatorioFinal.pastaSaida);
+fprintf('Gráficos: %s\n', relatorioFinal.pastaFiguras);
 
 
 
