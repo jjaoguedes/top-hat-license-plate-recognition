@@ -17,7 +17,7 @@ function [imagemROI, coordenadas] = extractPlateROI(imagem)
     [altura, largura, ~] = size(imagem);
 
     % Percentuais definidos para a etapa exploratoria.
-    proporcaoEsquerda = 0.06;
+    proporcaoEsquerda = 0.03;
     proporcaoDireita = 0.95;
     proporcaoSuperior = 0.32;
     proporcaoInferior = 0.90;
