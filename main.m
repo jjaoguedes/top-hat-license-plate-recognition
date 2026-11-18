@@ -37,7 +37,8 @@ sementeAleatoria = 42;
 
 % Parâmetro do sistema Top-hat.
 % Definir após concluir a validação do operador.
-raioElementoEstruturante = 25;
+formaElementoEstruturante = 'disk';
+raioElementoEstruturante = 51;
 fprintf('Raio do elemento estruturante: %d\n', ...
     raioElementoEstruturante);
 
@@ -214,7 +215,7 @@ end
 % As imagens processadas são salvas em data/e2/.
 
 arquivoOCRProposto = fullfile(raizProjeto, ...
-    'results', 'proposed', 'ocr_proposed.csv');
+    'results', 'e2_proposed', 'ocr_proposed.csv');
 
 diretorioE2 = fullfile(raizProjeto, 'data', 'e2');
 
@@ -237,7 +238,8 @@ if ~isfile(arquivoOCRProposto)
     fprintf('\nExecutando sistema e2 - Top-hat...\n');
 
     resultadosPropostos = runProposed( ...
-        raizProjeto, raioElementoEstruturante);
+        raizProjeto, formaElementoEstruturante, ...
+        raioElementoEstruturante);
 
 else
 
