@@ -9,7 +9,7 @@ function [text, imagemProcessada] = recognizePlate( ...
 %   caminhoImagem - Caminho completo da imagem da placa.
 %   system        - Sistema: 'e1' ou 'e2' (padrão: 'e1').
 %   SE            - Forma do elemento estruturante (padrão: 'disk').
-%   raio          - Raio do elemento estruturante (padrão: 51).
+%   raio          - Raio do elemento estruturante (padrão: 25).
 %
 % Saídas:
 %   text             - Texto bruto retornado pelo OCR.
@@ -24,7 +24,7 @@ if nargin < 3 || isempty(SE)
 end
 
 if nargin < 4 || isempty(raio)
-    raio = 51;
+    raio = 25;
 end
 
 if ~isfile(caminhoImagem)
@@ -46,7 +46,9 @@ switch lower(char(string(system)))
             'Sistema deve ser ''e1'' ou ''e2''.');
 end
 
-resultado = ocr(imagemProcessada, ...
+imagemROI = extractPlateROI(imagemProcessada);
+
+resultado = ocr(imagemROI, ...
     'LayoutAnalysis', 'Block', ...
     'CharacterSet', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
 text = string(resultado.Text);
