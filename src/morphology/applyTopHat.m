@@ -1,5 +1,5 @@
 
-function [imagemCorrigida, imagemTopHat] = applyTopHat(imagemOriginal, raio)
+function [imagemCorrigida, imagemTopHat] = applyTopHat(imagemOriginal, SE, raio)
 % APPLYTOPHAT Aplica o Black Top-hat em uma imagem para correção de iluminação.
 %
 % A função utiliza a transformação morfológica Black Top-hat para atenuar
@@ -28,10 +28,6 @@ function [imagemCorrigida, imagemTopHat] = applyTopHat(imagemOriginal, raio)
 
 %% 1. Configuração dos parâmetros
 
-if nargin < 2
-    raio = 9;
-end
-
 % Verifica se o parâmetro é um número inteiro positivo.
 validateattributes(raio, {'numeric'}, ...
     {'scalar', 'integer', 'positive'});
@@ -46,14 +42,27 @@ else
     imagemCinza = imagemOriginal;
 end
 
-
 %% 3. Definição do elemento estruturante
 
-% Utiliza um elemento estruturante quadrado.
-% O lado do quadrado é calculado por 2*raio + 1.
-tamanhoQuadrado = 2 * raio + 1;
+% Calcula o tamanho com base no raio
+tamanho = 2 * raio + 1;
 
-elementoEstruturante = strel('square', tamanhoQuadrado);
+if strcmp(SE, 'square')
+    % Elemento estruturante quadrado
+    elementoEstruturante = strel('square', tamanho);
+
+elseif strcmp(SE, 'rectangle')
+    % Elemento estruturante retangular
+    alturaRetangulo = tamanho;
+    larguraRetangulo = round(tamanho * 1.5);
+
+    elementoEstruturante = strel('rectangle', ...
+        [alturaRetangulo, larguraRetangulo]);
+
+else
+    % Outros elementos estruturantes (disk, diamond etc.)
+    elementoEstruturante = strel(SE, raio);
+end
 
 
 %% 4. Aplicação manual do Black Top-hat
