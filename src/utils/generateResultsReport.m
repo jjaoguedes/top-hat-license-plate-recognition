@@ -5,7 +5,8 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
 %   relatorio = generateResultsReport(raizProjeto);
 %   relatorio = generateResultsReport(raizProjeto, configuracao);
 %
-% Lê os resultados de results/metrics e results/proposed. Salva tabelas e
+% Lê os resultados de results/e1_baseline e results/e2_proposed. Também
+% aceita o layout anterior em results/metrics. Salva tabelas e
 % um relatório textual em results/reports/<pasta_exclusiva>/ e os gráficos
 % correspondentes em results/figures/<pasta_exclusiva>/.
 
@@ -20,57 +21,62 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
         'configuracao deve ser uma estrutura escalar.');
 
     %% 1. Carregamento e validação das fontes
-    diretorioMetricas = fullfile(raizProjeto, 'results', 'metrics');
-    arquivoE1 = fullfile(diretorioMetricas, 'baseline_comparison.csv');
-    arquivoE2 = fullfile(diretorioMetricas, 'proposed_comparison.csv');
-    arquivoMetricasE1 = fullfile(diretorioMetricas, 'baseline_metrics.csv');
-    arquivoMetricasE2 = fullfile(diretorioMetricas, 'proposed_metrics.csv');
-    arquivoOCRProposto = fullfile(raizProjeto, 'results', 'proposed', ...
+    arquivoGT = fullfile(raizProjeto, 'data', 'ground_truth', ...
+        'ground_truth.csv');
+    arquivoE1 = fullfile(raizProjeto, 'results', 'e1_baseline', ...
+        'ocr_baseline.csv');
+    arquivoE2 = fullfile(raizProjeto, 'results', 'e2_proposed', ...
         'ocr_proposed.csv');
-    arquivos = {arquivoE1, arquivoE2, arquivoMetricasE1, ...
-        arquivoMetricasE2, arquivoOCRProposto};
-
-    for k = 1:numel(arquivos)
-        assert(isfile(arquivos{k}), ...
-            'Arquivo necessário não encontrado: %s', arquivos{k});
+    if ~isfile(arquivoE1)
+        arquivoE1 = fullfile(raizProjeto, 'results', 'baseline', ...
+            'ocr_baseline.csv');
     end
+    if ~isfile(arquivoE2)
+        arquivoE2 = fullfile(raizProjeto, 'results', 'proposed', ...
+            'ocr_proposed.csv');
+    end
+    assert(isfile(arquivoGT), 'Ground Truth não encontrado: %s', arquivoGT);
+    assert(isfile(arquivoE1), 'Resultados OCR e1 não encontrados.');
+    assert(isfile(arquivoE2), 'Resultados OCR e2 não encontrados.');
 
-    e1 = readtable(arquivoE1, 'TextType', 'string');
-    e2 = readtable(arquivoE2, 'TextType', 'string');
-    metricasE1 = readtable(arquivoMetricasE1, 'TextType', 'string');
-    metricasE2 = readtable(arquivoMetricasE2, 'TextType', 'string');
-    ocrProposto = readtable(arquivoOCRProposto, 'TextType', 'string');
+    gt = readtable(arquivoGT, 'TextType', 'string');
+    ocrE1 = lerOCRArquivo(arquivoE1);
+    ocrE2 = lerOCRArquivo(arquivoE2);
+    exigirColunas(gt, {'image_id','file_name','plate_text','status'}, ...
+        'Ground Truth');
 
-    exigirColunas(e1, {'image_id','file_name','ground_truth', ...
-        'recognized_text','is_correct'}, 'Comparação baseline');
-    exigirColunas(e2, {'image_id','file_name','ground_truth', ...
-        'recognized_text','is_correct'}, 'Comparação proposta');
-    colunasMetricas = {'verified_plates','exact_matches', ...
-        'incorrect_matches','accuracy_percent','cer_percent'};
-    exigirColunas(metricasE1, colunasMetricas, 'Métricas baseline');
-    exigirColunas(metricasE2, colunasMetricas, 'Métricas proposta');
-    exigirColunas(ocrProposto, ...
-        {'image_id','file_name','recognized_text'}, 'OCR proposto');
+    gt = sortrows(gt, 'image_id');
+    ocrE1 = sortrows(ocrE1, 'image_id');
+    ocrE2 = sortrows(ocrE2, 'image_id');
+    assert(isequal(gt.image_id, ocrE1.image_id) && ...
+        isequal(gt.image_id, ocrE2.image_id), ...
+        'Os IDs do Ground Truth não correspondem aos resultados OCR.');
+    assert(isequal(string(gt.file_name), string(ocrE1.file_name)) && ...
+        isequal(string(gt.file_name), string(ocrE2.file_name)), ...
+        'Os nomes de arquivo não correspondem aos resultados OCR.');
 
-    assert(height(metricasE1) == 1 && height(metricasE2) == 1, ...
-        'Cada arquivo de métricas deve conter exatamente uma linha.');
+    verdade = normalizar(gt.plate_text);
+    textoE1 = normalizar(ocrE1.raw_ocr_text);
+    textoE2 = normalizar(ocrE2.raw_ocr_text);
+    e1 = table(gt.image_id, gt.file_name, verdade, textoE1, ...
+        textoE1 == verdade, 'VariableNames', {'image_id','file_name', ...
+        'ground_truth','recognized_text','is_correct'});
+    e2 = table(gt.image_id, gt.file_name, verdade, textoE2, ...
+        textoE2 == verdade, 'VariableNames', {'image_id','file_name', ...
+        'ground_truth','recognized_text','is_correct'});
 
     %% 2. Alinhamento dos resultados por imagem
     e1 = sortrows(e1, 'image_id');
     e2 = sortrows(e2, 'image_id');
-    ocrProposto = sortrows(ocrProposto, 'image_id');
 
-    assert(height(e1) == height(e2) && height(e2) == height(ocrProposto), ...
+    assert(height(e1) == height(e2), ...
         'Os resultados dos sistemas possuem quantidades diferentes de imagens.');
     assert(numel(unique(e1.image_id)) == height(e1) && ...
-        numel(unique(e2.image_id)) == height(e2) && ...
-        numel(unique(ocrProposto.image_id)) == height(ocrProposto), ...
+        numel(unique(e2.image_id)) == height(e2), ...
         'Existem IDs de imagens duplicados nos resultados.');
-    assert(isequal(e1.image_id, e2.image_id) && ...
-        isequal(e2.image_id, ocrProposto.image_id), ...
+    assert(isequal(e1.image_id, e2.image_id), ...
         'Os IDs das imagens não correspondem entre os resultados.');
-    assert(isequal(string(e1.file_name), string(e2.file_name)) && ...
-        isequal(string(e2.file_name), string(ocrProposto.file_name)), ...
+    assert(isequal(string(e1.file_name), string(e2.file_name)), ...
         'Os nomes das imagens não correspondem entre os resultados.');
 
     id = e1.image_id;
@@ -79,12 +85,8 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
     verdadeE2 = normalizar(e2.ground_truth);
     textoE1 = normalizar(e1.recognized_text);
     textoE2 = normalizar(e2.recognized_text);
-    textoOCRProposto = normalizar(ocrProposto.recognized_text);
-
     assert(isequal(verdade, verdadeE2), ...
         'O Ground Truth não corresponde entre os sistemas.');
-    assert(isequal(textoE2, textoOCRProposto), ...
-        'O OCR proposto diverge da comparação salva em metrics.');
     assert(all(strlength(verdade) > 0 & ~ismissing(verdade)), ...
         'Existem transcrições Ground Truth vazias.');
 
@@ -127,7 +129,6 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
         'correta_e1','correta_e2','situacao_cer','situacao_acerto'});
 
     sistemas = ["e1 - Baseline"; "e2 - Top-hat"];
-    metricas = {metricasE1; metricasE2};
     resumo = table('Size', [2 8], ...
         'VariableTypes', {'string','double','double','double', ...
         'double','double','double','double'}, ...
@@ -137,7 +138,6 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
     resumo.sistema = sistemas;
 
     for i = 1:2
-        dados = metricas{i};
         if i == 1
             reconhecimentosCorretos = sum(corretaE1);
             cerGlobalCalculada = 100 * sum(distanciaE1) / sum(comprimento);
@@ -149,19 +149,11 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
             cerMediaCalculada = mean(cerE2);
             quantidadeVazios = sum(strlength(textoE2) == 0);
         end
-        assert(dados.verified_plates(1) == total && ...
-            dados.exact_matches(1) == reconhecimentosCorretos && ...
-            dados.incorrect_matches(1) == total - reconhecimentosCorretos && ...
-            abs(dados.accuracy_percent(1) - ...
-                100 * reconhecimentosCorretos / total) < 1e-8 && ...
-            abs(dados.cer_percent(1) - cerGlobalCalculada) < 1e-8, ...
-            'As métricas salvas não correspondem aos resultados por imagem.');
-
-        resumo.placas_avaliadas(i) = dados.verified_plates(1);
-        resumo.placas_corretas(i) = dados.exact_matches(1);
-        resumo.placas_incorretas(i) = dados.incorrect_matches(1);
-        resumo.acuracia_percent(i) = dados.accuracy_percent(1);
-        resumo.cer_global_percent(i) = dados.cer_percent(1);
+        resumo.placas_avaliadas(i) = total;
+        resumo.placas_corretas(i) = reconhecimentosCorretos;
+        resumo.placas_incorretas(i) = total - reconhecimentosCorretos;
+        resumo.acuracia_percent(i) = 100 * reconhecimentosCorretos / total;
+        resumo.cer_global_percent(i) = cerGlobalCalculada;
         resumo.cer_media_por_placa_percent(i) = cerMediaCalculada;
         resumo.ocr_vazios(i) = quantidadeVazios;
     end
@@ -269,6 +261,35 @@ function relatorio = generateResultsReport(raizProjeto, configuracao)
     fprintf('Placas com CER igual: %d\n', sum(deltaCER == 0));
     fprintf('\nRelatório e tabelas: %s\n', pastaSaida);
     fprintf('Gráficos: %s\n\n', pastaFiguras);
+end
+
+function tabela = lerOCRArquivo(arquivo)
+    linhas = readlines(arquivo);
+    ids = zeros(0, 1);
+    nomes = strings(0, 1);
+    textos = strings(0, 1);
+    indiceAtual = 0;
+
+    for i = 2:numel(linhas)
+        linha = strtrim(string(linhas(i)));
+        if strlength(linha) == 0
+            continue;
+        end
+
+        partes = regexp(char(linha), '^([0-9]+),([^,]+),(.*)$', ...
+            'tokens', 'once');
+        if ~isempty(partes)
+            indiceAtual = indiceAtual + 1;
+            ids(indiceAtual, 1) = str2double(partes{1});
+            nomes(indiceAtual, 1) = string(partes{2});
+            textos(indiceAtual, 1) = string(partes{3});
+        elseif indiceAtual > 0
+            textos(indiceAtual) = textos(indiceAtual) + linha;
+        end
+    end
+
+    tabela = table(ids, nomes, textos, 'VariableNames', ...
+        {'image_id','file_name','raw_ocr_text'});
 end
 
 function exigirColunas(tabela, colunas, origem)
