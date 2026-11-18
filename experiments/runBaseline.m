@@ -28,7 +28,7 @@ function resultados = runBaseline(raizProjeto)
         'data', 'selected', 'plates');
 
     diretorioResultados = fullfile(raizProjeto, ...
-        'results', 'baseline');
+        'results', 'e1_baseline');
 
     arquivoResultados = fullfile(diretorioResultados, ...
         'ocr_baseline.csv');
@@ -97,8 +97,6 @@ function resultados = runBaseline(raizProjeto)
 
     %% 6. Preparação das variáveis
 
-    % Armazena os caracteres reconhecidos e normalizados.
-    textosReconhecidos = strings(quantidadePlacas, 1);
 
     % Armazena os textos brutos retornados pelo OCR.
     textosOriginaisOCR = strings(quantidadePlacas, 1);
@@ -121,11 +119,10 @@ function resultados = runBaseline(raizProjeto)
             nomeArquivo);
 
         % Executa o reconhecimento OCR.
-        [textoNormalizado, textoBruto] = ...
-            recognizePlate(caminhoPlaca);
+        [textoBruto] = ...
+            recognizePlate(caminhoPlaca, 'e1', 'disk', 51);
 
         % Armazena os resultados do reconhecimento.
-        textosReconhecidos(indice) = textoNormalizado;
         textosOriginaisOCR(indice) = textoBruto;
 
         % Apresenta o resultado no Command Window.
@@ -134,7 +131,7 @@ function resultados = runBaseline(raizProjeto)
             quantidadePlacas, ...
             selecao.image_id(indice), ...
             nomeArquivo, ...
-            textoNormalizado);
+            textoBruto);
 
     end
 
@@ -145,12 +142,10 @@ function resultados = runBaseline(raizProjeto)
     resultados = table( ...
         selecao.image_id, ...
         selecao.file_name, ...
-        textosReconhecidos, ...
         textosOriginaisOCR, ...
         'VariableNames', { ...
         'image_id', ...
         'file_name', ...
-        'recognized_text', ...
         'raw_ocr_text'});
 
     %% 9. Criação do diretório de resultados
@@ -166,7 +161,7 @@ function resultados = runBaseline(raizProjeto)
     %% 11. Exibição do resumo
 
     fprintf('\n========================================\n');
-    fprintf(' BASELINE CONCLUÍDO\n');
+    fprintf(' E1 BASELINE CONCLUÍDO\n');
     fprintf('========================================\n');
 
     fprintf('Total de placas processadas: %d\n', ...
