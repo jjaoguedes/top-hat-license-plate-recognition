@@ -18,8 +18,8 @@ desktop.ini
 # ==========================================
 # Base de dados
 # ==========================================
-/data/raw/
-/data/selected/
+#/data/raw/
+#/data/selected/
 
 # ==========================================
 # Imagens processadas
@@ -30,12 +30,12 @@ desktop.ini
 # ==========================================
 # Ground Truth
 # ==========================================
-/data/ground_truth/ground_truth.csv
+#/data/ground_truth/ground_truth.csv
 
 # ==========================================
 # Resultados experimentais
 # ==========================================
-/results/
+#/results/
 
 # ==========================================
 # Arquivos de experimentos anteriores
