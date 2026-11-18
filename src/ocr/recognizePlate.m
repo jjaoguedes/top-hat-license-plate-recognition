@@ -1,56 +1,53 @@
-
-function [textoNormalizado, textoBruto] = recognizePlate(caminhoImagem)
-% RECOGNIZEPLATE Reconhece caracteres de placas veiculares.
+function [text, imagemProcessada] = recognizePlate( ...
+        caminhoImagem, system, SE, raio)
+% RECOGNIZEPLATE Reconhece os caracteres de uma imagem de placa.
 %
-% A funcao executa OCR diretamente na imagem recebida,
-% sem aplicar ROI ou transformacoes morfologicas.
-%
-% Esta funcao e compartilhada pelos sistemas:
-% e1 - Placa original -> OCR.
-% e2 - Placa com Top-hat -> OCR.
+% O sistema e1 executa OCR na imagem original. O sistema e2 aplica
+% Black Top-hat antes do OCR.
 %
 % Entradas:
-% caminhoImagem - Caminho completo da imagem da placa.
+%   caminhoImagem - Caminho completo da imagem da placa.
+%   system        - Sistema: 'e1' ou 'e2' (padrão: 'e1').
+%   SE            - Forma do elemento estruturante (padrão: 'disk').
+%   raio          - Raio do elemento estruturante (padrão: 51).
 %
-% Saidas:
-% textoNormalizado - Texto contendo apenas letras e numeros.
-% textoBruto - Texto original retornado pelo OCR.
+% Saídas:
+%   text             - Texto bruto retornado pelo OCR.
+%   imagemProcessada - Imagem efetivamente enviada ao OCR.
 
-
-%% 1. Leitura da imagem
-
-if ~isfile(caminhoImagem)
-    error('Imagem nao encontrada: %s', caminhoImagem);
+if nargin < 2 || isempty(system)
+    system = 'e1';
 end
 
-imagemOriginal = imread(caminhoImagem);
+if nargin < 3 || isempty(SE)
+    SE = 'disk';
+end
 
+if nargin < 4 || isempty(raio)
+    raio = 51;
+end
 
-%% 2. Configuracao do OCR
+if ~isfile(caminhoImagem)
+    error('recognizePlate:ImagemNaoEncontrada', ...
+        'Imagem não encontrada: %s', caminhoImagem);
+end
 
-caracteresPermitidos = ...
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+imagemOriginal = im2gray(imread(caminhoImagem));
 
+switch lower(char(string(system)))
+    case 'e1'
+        imagemProcessada = imagemOriginal;
 
-%% 3. Reconhecimento dos caracteres
+    case 'e2'
+        imagemProcessada = applyTopHat(imagemOriginal, SE, raio);
 
-% Executa OCR diretamente sobre a imagem completa.
-% Nenhuma ROI e aplicada nesta funcao.
+    otherwise
+        error('recognizePlate:SistemaInvalido', ...
+            'Sistema deve ser ''e1'' ou ''e2''.');
+end
 
-resultadoOCR = ocr(imagemOriginal, ...
-    'LayoutAnalysis', 'line', ...
-    'CharacterSet', caracteresPermitidos);
-
-
-%% 4. Recuperacao do texto
-
-textoBruto = string(resultadoOCR.Text);
-
-
-%% 5. Normalizacao do reconhecimento
-
-% Remove espacos, quebras de linha e caracteres especiais.
-textoNormalizado = upper(regexprep( ...
-    textoBruto, '[^A-Za-z0-9]', ''));
-
+resultado = ocr(imagemProcessada, ...
+    'LayoutAnalysis', 'Block', ...
+    'CharacterSet', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+text = string(resultado.Text);
 end
