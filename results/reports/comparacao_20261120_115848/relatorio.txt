@@ -1,0 +1,64 @@
+RELATÓRIO DE RECONHECIMENTO DE PLACAS
+
+MÉTRICAS PRINCIPAIS
+
+e1 - Baseline
+Placas avaliadas: 40
+Reconhecimentos corretos: 6
+Reconhecimentos incorretos: 34
+Acurácia exata: 15.00%
+CER global: 42.65%
+CER média por placa: 43.15%
+OCR sem caracteres: 7
+
+e2 - Top-hat
+Placas avaliadas: 40
+Reconhecimentos corretos: 10
+Reconhecimentos incorretos: 30
+Acurácia exata: 25.00%
+CER global: 31.90%
+CER média por placa: 32.20%
+OCR sem caracteres: 4
+
+RECONHECIMENTO POR IMAGEM
+Imagem | Ground Truth | Baseline | Top-hat | CER baseline (%) | CER Top-hat (%)
+image_0002.jpg | 3NEV724 | INEVT2L | 3NEVT2L | 42.86 | 28.57
+image_0006.jpg | 4CYE275 | LCYEZT5 | LCYEZTS | 42.86 | 57.14
+image_0007.jpg | 3DDF536 | 13DDF534 | 3DDF536 | 28.57 | 0.00
+image_0008.jpg | EZEZBEH | IF7E7BEHE | EZEZBEH | 71.43 | 0.00
+image_0011.jpg | 2EKL423 | 2EKLL23 | 2EKLL23 | 14.29 | 14.29
+image_0012.jpg | 3XNL217 | 13XNL217 | J3XNL217 | 14.29 | 14.29
+image_0017.jpg | 2GNU250 |  | 126NU250 | 100.00 | 28.57
+image_0018.jpg | 2C0V479 |  |  | 100.00 | 100.00
+image_0020.jpg | 3JXK363 | 3JXK363 | 3JXK363 | 0.00 | 0.00
+image_0022.jpg | NEWCENTURY | NEWCENTURY | NEWCENTURY | 0.00 | 0.00
+image_0025.jpg | 3TRL684 | 3TRI48LI |  | 57.14 | 100.00
+image_0027.jpg | 2NPS930 | 2NPS930 | 2NP3930 | 0.00 | 14.29
+image_0029.jpg | 4ESD877 | LESDSTT | LESD8TT | 57.14 | 42.86
+image_0030.jpg | 2UMJ109 | 120MJ109 | 12UMJ109 | 28.57 | 14.29
+image_0033.jpg | 2MFF674 | RMEECTLEC | I2MFEGTLIO | 114.29 | 100.00
+image_0036.jpg | 3PHM599 |  | 13PHM599 | 100.00 | 14.29
+image_0037.jpg | 3UPS063 |  | 3UPS043 | 100.00 | 14.29
+image_0048.jpg | MYJ173 |  | MYNT3 | 100.00 | 50.00
+image_0050.jpg | 2G0E455 | 2G0EL55 | 112G0EL55 | 14.29 | 42.86
+image_0054.jpg | 3RJT926 | R3RIT926 | 3RJT926 | 28.57 | 0.00
+image_0055.jpg | 4GHY345 |  |  | 100.00 | 100.00
+image_0056.jpg | 2CPT952 | B2CPT952 | 2CPT952 | 14.29 | 0.00
+image_0058.jpg | 3PGR888 | 3PGR888 | 3PGR88S | 0.00 | 14.29
+image_0060.jpg | 4BHR609 | LBHR609 | LBHR609 | 14.29 | 14.29
+image_0063.jpg | UFD69K | JUFD69K | UFD69K | 16.67 | 0.00
+image_0075.jpg | 4CLT371 | LCLT3TL | LCLT3TL | 42.86 | 42.86
+image_0084.jpg | 3DHS501 | 13DHS501 | 13DHS501 | 14.29 | 14.29
+image_0087.jpg | 2NGW233 | B2NGH2330 | 2NGH233 | 42.86 | 14.29
+image_0088.jpg | 2SXX446 | 12SXXLLG | 12SXXLLG | 57.14 | 57.14
+image_0089.jpg | VZW818 | VZW818 | VZW818 | 0.00 | 0.00
+image_0091.jpg | 4DNX245 | LDNX2L5 | LDNX2L5 | 28.57 | 28.57
+image_0097.jpg | 2XRK320 | 2XRK320 | 2XRK320 | 0.00 | 0.00
+image_0099.jpg | 1MLD993 | 1MINQOT | LLG08 | 71.43 | 85.71
+image_0100.jpg | 3UHM683 |  |  | 100.00 | 100.00
+image_0101.jpg | 5Y16014 | B5Y1601L1 | BY1401L | 42.86 | 42.86
+image_0107.jpg | 3JXV739 | 13JXV739 | 13JXV739 | 14.29 | 14.29
+image_0108.jpg | 3XHK859 | 13YHK859 | 13YHK859 | 28.57 | 28.57
+image_0114.jpg | 3BSK828 | H3BSK828 | 3BSK828 | 14.29 | 0.00
+image_0120.jpg | 4S5190 | 31351901 | LLSF90 | 66.67 | 66.67
+image_0123.jpg | 3MUH050 | I3MUHDR0 | 3MUHDS0 | 42.86 | 28.57
