@@ -15,17 +15,6 @@ function [text, imagemProcessada] = recognizePlate( ...
 %   text             - Texto bruto retornado pelo OCR.
 %   imagemProcessada - Imagem efetivamente enviada ao OCR.
 
-if nargin < 2 || isempty(system)
-    system = 'e1';
-end
-
-if nargin < 3 || isempty(SE)
-    SE = 'disk';
-end
-
-if nargin < 4 || isempty(raio)
-    raio = 25;
-end
 
 if ~isfile(caminhoImagem)
     error('recognizePlate:ImagemNaoEncontrada', ...
