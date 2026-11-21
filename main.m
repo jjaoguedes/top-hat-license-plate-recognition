@@ -38,7 +38,7 @@ sementeAleatoria = 42;
 % Parâmetro do sistema Top-hat.
 % Definir após concluir a validação do operador.
 formaElementoEstruturante = 'disk';
-raioElementoEstruturante = 25;
+raioElementoEstruturante = 4;
 fprintf('Raio do elemento estruturante: %d\n', ...
     raioElementoEstruturante);
 
