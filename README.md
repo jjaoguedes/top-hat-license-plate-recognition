@@ -75,51 +75,7 @@ Serão investigadas métricas como:
 - Taxa de erro de caracteres (CER).
 - Quantidade de placas reconhecidas corretamente.
 
-### Relatório dos experimentos com ROI
-
-Para inspecionar as dimensões das placas selecionadas e visualizar a região
-dos caracteres delimitada em cada imagem, execute na raiz do projeto:
-
-```matlab
-run(fullfile(pwd, 'src', 'utils', 'analyzePlateCharacterRegion.m'));
-```
-
-O script exibe a dimensão média das imagens e das regiões recortadas, uma
-tabela com as dimensões individuais e figuras com a delimitação e os recortes.
-
-Para avaliar o baseline e o sistema Top-hat com a região da placa extraída
-antes do OCR, execute no MATLAB a partir da raiz do projeto:
-
-```matlab
-addpath(genpath(pwd));
-[resultados, resumo, comparacao] = testAllPlateROIs(pwd, true, 51);
-relatorioROI = generateROIResultsReport(pwd);
-```
-
-`testAllPlateROIs` aplica `extractPlateROI` aos dois sistemas e salva os
-resultados OCR em `results/analysis/roi_square_...`. O gerador de relatório
-usa os cenários `e1_com_roi` e `e2_com_roi` dessa execução. Por padrão, ele
-seleciona a execução mais recente que contém os resultados OCR completos.
-Para selecionar uma pasta específica:
-
-```matlab
-relatorioROI = generateROIResultsReport(pwd, ...
-    'results/analysis/roi_square_51_yyyymmdd_HHMMSS');
-```
-
-As tabelas e o relatório textual são salvos em
-`results/reports/roi_comparacao_...`, e os gráficos em
-`results/figures/roi_comparacao_...`. Esses diretórios são separados dos
-relatórios produzidos por `generateResultsReport`.
-
-### Relatório de execução do sistema proposto
-
-`runProposed` salva a tabela OCR em
-`results/e2_proposed/ocr_proposed.csv` e registra as linhas exibidas no
-Command Window, incluindo parâmetros, progresso por placa e resumo, em
-`results/e2_proposed/execution_report.csv`. O relatório contém as colunas
-`sequence`, `event_type`, `image_id`, `file_name`, `raw_ocr_text` e
-`console_output`.
+Relatórios gerados com os resultados em results/.
 
 ## 8. Referências
 

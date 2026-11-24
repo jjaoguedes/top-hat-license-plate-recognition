@@ -1,7 +1,7 @@
 
-%% MINI PROJETO - OPERADOR TOP-HAT
+%% MINI PROJETO
 % Correção de iluminação não uniforme em placas veiculares.
-%
+
 % Objetivo:
 % Executar e comparar dois sistemas de reconhecimento:
 %
@@ -35,15 +35,14 @@ addpath(fullfile(raizProjeto, 'experiments'));
 quantidadeImagens = 40;
 sementeAleatoria = 42;
 
-% Parâmetro do sistema Top-hat.
-% Definir após concluir a validação do operador.
+% Parâmetro do sistema Top-hat
 formaElementoEstruturante = 'disk';
 raioElementoEstruturante = 4;
 fprintf('Raio do elemento estruturante: %d\n', ...
     raioElementoEstruturante);
 
 fprintf('\n========================================\n');
-fprintf(' MINI PROJETO - TOP-HAT\n');
+fprintf(' MINI PROJETO \n');
 fprintf('========================================\n');
 
 
@@ -185,7 +184,6 @@ end
 
 % O sistema proposto aplica o Top-hat nas mesmas
 % 40 placas utilizadas pelo baseline.
-%
 % As imagens processadas são salvas em data/e2/.
 
 arquivoOCRProposto = fullfile(raizProjeto, ...
@@ -260,7 +258,7 @@ configuracaoRelatorio = struct( ...
     'layoutOCR', 'Block', ...
     'semente', sementeAleatoria);
 
-fprintf('\nGerando relatório consolidado e1 x e2...\n');
+fprintf('\nGerando relatório e1 x e2...\n');
 
 relatorioFinal = generateResultsReport( ...
     raizProjeto, configuracaoRelatorio);

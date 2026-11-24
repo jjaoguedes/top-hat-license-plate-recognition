@@ -9,7 +9,7 @@ function [text, imagemProcessada] = recognizePlate( ...
 %   caminhoImagem - Caminho completo da imagem da placa.
 %   system        - Sistema: 'e1' ou 'e2' (padrão: 'e1').
 %   SE            - Forma do elemento estruturante (padrão: 'disk').
-%   raio          - Raio do elemento estruturante (padrão: 25).
+%   raio          - Raio do elemento estruturante (padrão: 4).
 %
 % Saídas:
 %   text             - Texto bruto retornado pelo OCR.

@@ -1,11 +1,7 @@
-
-function selecao = selectImages(raizProjeto, quantidade, semente)
-% SELECTIMAGES Seleciona pares de imagens para os experimentos.
-%
+% Seleciona pares de imagens para os experimentos.
 % A função identifica imagens originais que possuem uma placa
 % recortada correspondente, seleciona uma quantidade aleatória
 % de pares e organiza os arquivos nos diretórios de destino.
-%
 % A seleção é realizada apenas uma vez. Caso o arquivo CSV
 % já exista, a seleção anterior será reutilizada.
 %
@@ -17,6 +13,8 @@ function selecao = selectImages(raizProjeto, quantidade, semente)
 % Saída:
 %   selecao     - Tabela com os identificadores, nomes dos
 %                 arquivos e semente utilizada.
+
+function selecao = selectImages(raizProjeto, quantidade, semente)
 
     %% 1. Configuração dos parâmetros
 

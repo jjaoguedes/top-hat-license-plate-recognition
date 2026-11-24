@@ -7,7 +7,7 @@ function resultados = runProposed(raizProjeto, SE, raio)
 % Entradas:
 %   raizProjeto - Caminho da pasta principal do projeto.
 %   SE          - Formato do elemento estruturante (padrão: 'disk').
-%   raio        - Raio do elemento estruturante (padrão: 25).
+%   raio        - Raio do elemento estruturante (padrão: 4).
 %
 % Saída:
 %   resultados  - Tabela com os textos brutos retornados pelo OCR.
@@ -17,7 +17,7 @@ function resultados = runProposed(raizProjeto, SE, raio)
     end
 
     if nargin < 3 || isempty(raio)
-        raio = 51;
+        raio = 4;
     end
 
     arquivoSelecao = fullfile(raizProjeto, ...
